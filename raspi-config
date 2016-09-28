@@ -1,0 +1,37 @@
+# remove the old sdcard to copy and add to sdcard reader
+diskutil list
+sudo dd if=/dev/disk2 of=~/pi_20160918.img bs=1m
+du -sh pi_20160918.img
+diskutil list
+# add the new sdcard in the sdcard slot of the Mac.
+sudo dd if=pi_20160918.img of=/dev/disk2 bs=1m
+# gives a resource busy error
+diskutil list
+sudo diskutil unmountDisk /dev/disk2
+sudo dd if=pi_20160918.img of=/dev/disk2 bs=1m
+diskutil list
+# Add the new sdcard in the raspberry pi 
+# vnc and run raspi-config and expand root filesystem
+sudo raspi-config
+
+# upgrade system to debian8 for docker enabled kernel
+sudo sed -i 's/wheezy/jessie/' /etc/apt/sources.list
+sudo sed -i 's/wheezy/jessie/' /etc/apt/sources.list.d/raspi.list 
+sudo apt-get update && sudo apt-get -y upgrade 
+sudo apt-get -y dist-upgrade
+sudo apt-get -y autoremove
+sudo apt-get -y purge $(dpkg -l | awk '/^rc/ { print $2 }')
+sudo init 6
+
+curl -sSL http://downloads.hypriot.com/docker-hypriot_1.8.1-1_armhf.deb >/tmp/docker-hypriot_1.8.1-1_armhf.deb
+sudo dpkg -i /tmp/docker-hypriot_1.8.1-1_armhf.deb
+rm -f /tmp/docker-hypriot_1.8.1-1_armhf.deb
+sudo sh -c 'usermod -aG docker $SUDO_USER'
+sudo systemctl enable docker.service
+sudo docker info
+docker version
+docker images
+sudo docker images
+df -k
+sudo docker run -i -t resin/rpi-raspbian
+sudo docker images
