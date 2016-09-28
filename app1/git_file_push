@@ -1,0 +1,7 @@
+# Git Push Files
+# cd to project files directory
+git init .
+git add .
+git commit -m "Alpine Linux Nodejs"
+git remote add origin https://github.com/pinnaman/dev-ripples.git
+git push -u origin master
