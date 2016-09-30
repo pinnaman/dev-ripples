@@ -14,3 +14,11 @@ hint: Updates were rejected because the tip of your current branch is behind
 hint: its remote counterpart. Integrate the remote changes (e.g.
 hint: 'git pull ...') before pushing again.
 hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+# create branch and push directory.
+git branch -a
+git branch arm
+git branch -a
+git pull origin master
+git merge arm
+git push origin master
