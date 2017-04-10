@@ -1,0 +1,34 @@
+FROM oraclelinux
+
+MAINTAINER Ajay Pinnamaneni
+
+# Install OS packages
+RUN yum -y install unzip libaio gcc-c++ tar make curl \
+&& useradd --user-group --create-home --shell /bin/false app
+
+# Add Node.js
+RUN curl -sSL https://nodejs.org/dist/v4.4.7/node-v4.4.7-linux-x64.tar.xz \
+| tar -xJC /opt/
+ENV PATH /opt/node-v4.4.7-linux-x64/bin:$PATH
+
+RUN npm install -g nodemon forever express socket.io livereload async redis node-cron xml2json nunjucks
+
+ENV HOME=/home/app
+RUN mkdir -p $HOME/sockets
+RUN chown -R app:app $HOME/*
+
+USER app
+WORKDIR $HOME/sockets
+
+# Install the node-oracledb module as global module to Node.js using npm
+#RUN npm install oracledb socket.io livereload async
+ENV NODE_PATH /opt/node-v4.4.7-linux-x64/lib/node_modules
+
+# copy node modules to user app directory
+#RUN cp -a /opt/node-v4.4.7-linux-x64/lib/node_modules $HOME/sockets
+
+RUN chown -R app:app $HOME/*
+
+EXPOSE 8080
+
+CMD ["nodemon", "-L", "/home/app/sockets/app.js"]

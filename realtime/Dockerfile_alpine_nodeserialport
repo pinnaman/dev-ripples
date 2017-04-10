@@ -1,0 +1,13 @@
+FROM gliderlabs/alpine:3.4
+
+MAINTAINER Ajay Pinnamaneni
+
+#RUN http://dl-6.alpinelinux.org/alpine/v3.4/main >> /etc/apk/repositories
+#RUN http://dl-6.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories
+RUN apk update
+
+RUN apk add --no-cache nodejs && \
+    apk add --no-cache make gcc g++ python linux-headers udev
+
+# Then we can install serialport, forcing it to compile
+RUN npm install -g serialport --build-from-source=serialport

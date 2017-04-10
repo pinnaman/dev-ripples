@@ -1,0 +1,1 @@
+npm install -g nodemon forever express socket.io livereload async redis node-cron xml2json nunjucks underscore

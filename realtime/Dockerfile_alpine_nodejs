@@ -1,0 +1,41 @@
+FROM mhart/alpine-node:4  
+
+ENV DEL_PKGS="libgcc libstdc++" RM_DIRS=/usr/include NODE_PATH=/usr/lib/node_modules/
+
+RUN http://dl-6.alpinelinux.org/alpine/v3.4/main >> /etc/apk/repositories
+RUN http://dl-6.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories
+RUN apk update
+
+
+#RUN apk add git make perl python
+RUN npm cache clean
+RUN npm install -g nodemon express socket.io nunjucks underscore node-cron cheerio async redis webpack browserify slick-carousel selenium phantomjs casperjs
+
+# clean up as root
+#RUN apk del curl make gcc g++ python linux-headers ${DEL_PKGS}
+RUN rm -rf /etc/ssl ${RM_DIRS} \
+    /usr/share/man /tmp/* /var/cache/apk/* /root/.npm /root/.node-gyp /root/.gnupg \
+    /usr/lib/node_modules/npm/man /usr/lib/node_modules/npm/doc /usr/lib/node_modules/npm/html
+
+# Add User info
+ENV USER=app
+RUN export uid=1000 gid=1000 pswd=test && \
+    apk add --no-cache sudo && \
+    adduser -D -g app -s /bin/shell app && \
+    echo "app:test" | chpasswd && \
+    echo "app ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/app && \
+    chmod 0440 /etc/sudoers.d/$USER
+
+ENV HOME=/home/app
+RUN mkdir -p $HOME/sockets
+RUN chown -R app:app $HOME/*
+
+USER app
+WORKDIR $HOME/sockets
+
+EXPOSE 8080
+
+#RUN cd /home/app/sockets
+#RUN npm link express socket.io
+
+CMD ["nodemon", "-L" , "/home/app/sockets/app.js"]  

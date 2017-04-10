@@ -1,0 +1,50 @@
+FROM mhart/alpine-node:4
+ 
+#ENV NODE_ALPINE_VERSION=6.5.0-r0
+
+ENV DEL_PKGS="libgcc libstdc++" RM_DIRS=/usr/include NODE_PATH=/usr/lib/node_modules/
+ 
+RUN apk update && apk upgrade \
+    #&& apk add nodejs="$NODE_ALPINE_VERSION" g++ curl git bash make --update perl && \
+    && apk add g++ git bash make && \
+    cd /tmp && \
+    apk add --update g++ git fontconfig-dev \
+    freetype-dev icu-dev jpeg-dev libpng-dev openssl openssl-dev qt5-qtwebkit-dev \
+    && rm -rf /var/cache/apk/*
+
+#RUN npm install -g phantomjs-prebuilt casperjs \
+#    && rm /usr/local/bin/phantomjs \
+#    && cp /usr/lib/node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs /usr/local/bin/phantomjs \
+#    && cp /node_modules/casperjs/bin/casperjs /usr/local/bin/casperjs 
+#    && rm -rf /usr/local/lib/node_modules/phantomjs-prebuilt 
+
+RUN npm install -g nodemon express socket.io nunjucks underscore node-cron cheerio async redis webpack browserify slick-carousel
+
+RUN apk del git bash make gcc g++ python linux-headers ${DEL_PKGS} && \
+    rm -rf ${RM_DIRS} \
+    /usr/share/man /tmp/* /var/cache/apk/* /root/.npm /root/.node-gyp /root/.gnupg \
+    /usr/lib/node_modules/npm/man /usr/lib/node_modules/npm/doc /usr/lib/node_modules/npm/html 
+
+# Add User info
+ENV USER=app
+RUN export uid=1000 gid=1000 pswd=test && \
+    apk add --no-cache sudo && \
+    adduser -D -g app -s /bin/shell app && \
+    echo "app:test" | chpasswd && \
+    echo "app ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/app && \
+    chmod 0440 /etc/sudoers.d/$USER
+
+ENV HOME=/home/app
+RUN pwd
+
+RUN sudo cp -R /usr/lib/node_modules $HOME
+#RUN sudo rm -rf /usr/lib/node_modules
+
+RUN mkdir -p $HOME/webtools
+RUN sudo chown -R app:app $HOME/*
+USER app
+WORKDIR $HOME/webtools
+
+EXPOSE 8080
+
+CMD ["nodemon", "-L", "/home/app/webtools/app.js"]
